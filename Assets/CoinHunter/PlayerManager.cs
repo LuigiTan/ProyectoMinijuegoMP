@@ -14,6 +14,13 @@ public class PlayerManager : NetworkBehaviour
     public float Playerspeed = 10f;
     public GameObject coinCounter;
     public GameObject joinMessage;
+    [SyncVar(hook = nameof(HideJoinMessage))]
+    private bool hasJoined = false;
+
+    [SyncVar(hook = nameof(HideCoinCounter))]
+    private bool alreadyCollected = false;
+
+
     [SyncVar(hook = nameof(SetColor))]
     public Color color;
 
@@ -21,9 +28,8 @@ public class PlayerManager : NetworkBehaviour
     [SyncVar(hook = nameof(OnCoinCountChanged))]//En cuanto se actualiza el valor abajo, la siguiente funcion se ejecuta
     private int coinsCollected = 0;
 
-    //[SyncVar(hook = nameof(SetColor))]
-    //public Color color;
-    //private Rigidbody2D rb;
+    public bool busy = false;
+  
     #region Unity Callbacks
 
     /// <summary>
@@ -41,12 +47,17 @@ public class PlayerManager : NetworkBehaviour
 
     private void Start()
     {
-        if (!isLocalPlayer) return;//Si no es el jugador local se ignora
+        if (hasJoined) return;//Si no es el jugador local se ignora
         /*if (isServer)//Entra si esta en el server spawneado
         {
             AssignColorRandom();
         }*/
-        Invoke("HideJoinMessage", 2);
+        
+        joinMessage.SetActive(true);
+
+
+        Invoke("CommandHideJoin", 2);
+
     }
 
     private void Update()
@@ -94,7 +105,7 @@ public class PlayerManager : NetworkBehaviour
     {
         //AssignColorRandom();
         CommandSetColor(new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)));
-        Invoke("HideJoinMessage", 2);
+        //Invoke("HideJoinMessage", 2);
     }
 
     /// <summary>
@@ -134,18 +145,41 @@ public class PlayerManager : NetworkBehaviour
     {
         
         coinCounter.GetComponent<TMP_Text>().text = "Coins: " + coinsCollected;
-        coinCounter.gameObject.SetActive(true);        
-        Invoke("HideCoinCounter", 2);
+        //coinCounter.gameObject.SetActive(true);
+        if (!busy)
+        {
+            switchCoin();
+        }
+        
+    }
+
+    [Command]
+    private void switchCoin() 
+    {
+        alreadyCollected = !alreadyCollected; 
     }
     [ClientRpc]
-    private void HideCoinCounter()
+    private void HideCoinCounter(bool oldState, bool newState)
     {
+        busy = newState;
+        coinCounter.SetActive(newState);
+        if(newState == true)
+        {
+            
+            Invoke("switchCoin", 2);
+        }
         
-        coinCounter.SetActive(false);
+    }
+
+    [Command]
+    private void CommandHideJoin()
+    {
+
+        hasJoined = true;
     }
 
     [ClientRpc]
-    private void HideJoinMessage()
+    private void HideJoinMessage(bool oldState, bool newState)
     {
         if (joinMessage != null)//Esto es en caso de que se me olvide asignarlo (paso)
         {
@@ -163,17 +197,5 @@ public class PlayerManager : NetworkBehaviour
     {
         sr.color = newColor;
     }
-    /*
-    [Command]
-    private void AssignColorRandom()
-    {
-        Color randomColor = new Color(Random.value, Random.value, Random.value);
-        SetColor(randomColor);
-    }
-    [ClientRpc]
-    private void SetColor(Color color)
-    {
-        GetComponent<SpriteRenderer>().color = color;
-    }
-    */
+    
 }

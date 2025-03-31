@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8948549068578979325
 RectTransform:
   m_ObjectHideFlags: 0
@@ -330,7 +330,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  Playerspeed: 50
+  Playerspeed: 10
   coinCounter: {fileID: 7658738930947691745}
   joinMessage: {fileID: 2108416906209868360}
   color: {r: 0, g: 0, b: 0, a: 0}
