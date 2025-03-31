@@ -391,3 +391,6 @@ MonoBehaviour:
   chatBubble: {fileID: 8235404202226272115, guid: 4cc13ee359eb8744f977d798b56912ce, type: 3}
   color: {r: 0, g: 0, b: 0, a: 0}
   sr: {fileID: 1242142235198002778}
+  bubbleMask:
+    serializedVersion: 2
+    m_Bits: 64
